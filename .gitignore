@@ -1,0 +1,12 @@
+venv/*
+.env
+.pyc
+__pycache__/*
+menu/*
+orders/*
+items/*
+tables/*
+build/*
+static/*
+staticfiles/*
+db.sqlite3
