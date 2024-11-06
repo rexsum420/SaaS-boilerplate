@@ -25,30 +25,31 @@ def activate(request, username, token):
             user = None
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
-
-    if user is not None:
-        owners = Owner.objects.filter(user=user)
-        managers = Manager.objects.filter(user=user)
-        employees = Employee.objects.filter(user=user)        
-        if len(owners) == 1:
-            owners.email_confirmed = True
-            owners.save()
-        elif len(owners) > 1:
-            return PermissionDenied('Too many owner objects associated to that user returned')
-        if len(managers) == 1:
-            managers.email_confirmed = True
-            managers.save()
-        elif len(managers) > 1:
-            return PermissionDenied('Too many manager objects associated to that user returned')
-        if len(employees) == 1:
-            employees.email_confirmed = True
-            employees.save()
-        elif len(employees) > 1:
-            return PermissionDenied('Too many employee objects associated to that user returned')
-        return render(request, 'email_verified.html', {'user': user})
-    else:
-        return HttpResponse('email not verified')
-    
+    try:
+        if user is not None:
+            owners = Owner.objects.filter(user=user)
+            managers = Manager.objects.filter(user=user)
+            employees = Employee.objects.filter(user=user)        
+            if len(owners) == 1:
+                owners.email_confirmed = True
+                owners.save()
+            elif len(owners) > 1:
+                return PermissionDenied('Too many owner objects associated to that user returned')
+            if len(managers) == 1:
+                managers.email_confirmed = True
+                managers.save()
+            elif len(managers) > 1:
+                return PermissionDenied('Too many manager objects associated to that user returned')
+            if len(employees) == 1:
+                employees.email_confirmed = True
+                employees.save()
+            elif len(employees) > 1:
+                return PermissionDenied('Too many employee objects associated to that user returned')
+            return render(request, 'email_verified.html', {'user': user})
+        else:
+            return HttpResponse('email not verified')
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist, Token.DoesNotExist):
+        return HttpResponse('Invalid verification link.')   
 User = get_user_model()
 
 class CheckTokenView(APIView):

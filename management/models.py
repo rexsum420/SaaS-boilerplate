@@ -3,11 +3,6 @@ from rest_framework.authtoken.models import Token
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpRequest
 from saas.fields import SSNField
 
 class Manager(models.Model):

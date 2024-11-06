@@ -24,6 +24,7 @@ class ContextMiddleware(MiddlewareMixin):
                 elif role == 'Employee':
                     rmodel = Employee.objects.get(user=request.user)
                 rmodel.last_active = timezone.now()
+                # run other functions here
                 rmodel.save()
         except AuthenticationFailed:
             return self._unauthorized_response()

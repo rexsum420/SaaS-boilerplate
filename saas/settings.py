@@ -50,7 +50,9 @@ ROOT_URLCONF = 'saas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,6 +64,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'saas.wsgi.application'
 
@@ -128,3 +131,6 @@ if USE_SSL:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    
+SITE_URL = "http://localhost:8000"
+DEFAULT_FROM_EMAIL = "noreply@yourdomain.com"

@@ -22,6 +22,5 @@ def role_processor(request):
         user = None
         role = None   
     return {
-        'user': user,
         'role': role
     }

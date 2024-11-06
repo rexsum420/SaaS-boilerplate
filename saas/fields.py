@@ -3,10 +3,6 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
 class SSNField(models.CharField):
-    """
-    Custom model field to store a US Social Security Number (SSN) in the format XXX-XX-XXXX.
-    """
-
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = 11
         kwargs['validators'] = [
@@ -19,9 +15,6 @@ class SSNField(models.CharField):
         super().__init__(*args, **kwargs)
 
     def clean(self, value, model_instance):
-        """
-        Ensure that the SSN has the correct format and remove dashes for storage if necessary.
-        """
         value = super().clean(value, model_instance)
         if value:
             parts = value.split('-')
@@ -42,4 +35,9 @@ class SSNField(models.CharField):
     def get_prep_value(self, value):
         if value:
             return value.replace('-', '')
+        return value
+
+    def masked_value(self, value):
+        if value and len(value) == 11:
+            return f"XXX-XX-{value[-4:]}"
         return value

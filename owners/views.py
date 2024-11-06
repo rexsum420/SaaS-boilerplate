@@ -2,11 +2,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
 from saas.context_processor import get_role
 from owners.models import Owner
-from management.models import Manager
-from employees.models import Employee
 from owners.serializers import OwnerSerializer
 
 class OwnerViewSet(viewsets.ModelViewSet):
