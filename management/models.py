@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest
-from menu_app.fields import SSNField
+from saas.fields import SSNField
 
 class Manager(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

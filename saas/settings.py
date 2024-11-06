@@ -30,11 +30,7 @@ INSTALLED_APPS = [
     'admin_panel',
     'employees',
     'management',
-    'menu',
-    'orders',
     'owners',
-    'tables',
-    'items',
 ]
 
 MIDDLEWARE = [
@@ -42,14 +38,14 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'menu_app.middleware.ContextMiddleware',
+    'saas.middleware.ContextMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'menu_app.urls'
+ROOT_URLCONF = 'saas.urls'
 
 TEMPLATES = [
     {
@@ -67,7 +63,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'menu_app.wsgi.application'
+WSGI_APPLICATION = 'saas.wsgi.application'
 
 DATABASES = {
     'default': {
