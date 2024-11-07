@@ -15,7 +15,7 @@ class OwnerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             role = get_role(self.request.user)
-            if role == 'Owner' or role == 'Admin':            
+            if role in ['Owner', 'Admin']:            
                 owners = Owner.objects.all()
                 qs = owners
                 return qs

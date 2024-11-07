@@ -18,7 +18,7 @@ class ManagerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             role = get_role(self.request.user)
-            if role == 'Owner' or role == 'Admin' or role == 'Manager':             
+            if role in ['Owner', 'Admin', 'Manager']:             
                 managers = Manager.objects.all()
                 qs = managers
                 return qs

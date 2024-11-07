@@ -15,7 +15,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             role = get_role(self.request.user)
-            if role == 'Owner' or role == 'Admin' or role == 'Manager' or role == 'Employee':             
+            if role in ['Owner', 'Admin', 'Manager', 'Employee']:             
                 employees = Employee.objects.all()
                 qs = employees
                 return qs

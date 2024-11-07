@@ -1,9 +1,14 @@
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.db import models
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
+from django.dispatch import receiver
+from django.conf import settings
 from saas.fields import SSNField
+
 
 class Manager(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -25,3 +30,9 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Manager.objects.create(user=instance)
         Token.objects.create(user=instance)
         
+def send_verification_email(owner, token):
+    activation_url = f"{settings.SITE_URL}{reverse('activate', kwargs={'username': owner.user.username, 'token': token.key})}"
+    subject = "Verify your Email"
+    message = f"Hello {owner.user.username},\n\nPlease confirm your email to verify ownership of your account.\nClick the link below:\n{activation_url}\n\nThank you!"
+    
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [owner.email])
