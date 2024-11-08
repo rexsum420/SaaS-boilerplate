@@ -1,16 +1,40 @@
 {% extends 'layouts/base.html' %}
-{% load static %}
-
 {% block content %}
-<div class="col-12 d-flex align-items-center justify-content-center">
-    <div class="bg-white shadow border-0 px-4 pb-4 rounded border-light w-100 fmxw-500">
-        <p>
-            <h5 style="text-align:center"><b>Actions</b></h5>
-        </p>
-        <hr />
-        <a href="{% url 'register' %}" class="btn btn-primary">
-            Add User
-        </a>
-    </div>
+<div class="container text-center">
+    <h2>Enter PIN</h2>
+    <form id="pinForm" method="post" action="{% url 'enter_pin' %}">
+        {% csrf_token %}
+        <div id="pin-display">
+            <input type="password" name="pin" id="pinInput" maxlength="4" autocomplete="off" style="text-align: center; font-size: 60px; width: 500px;" required readonly>
+        </div>
+        <div class="buttons">
+            {% for i in "123456789" %}
+                <button type="button" class="btn btn-primary p-5 m-3" onclick="addDigit('{{ i }}')">{{ i }}</button>
+                {% if forloop.counter|divisibleby:3 %}<br>{% endif %}
+            {% endfor %}
+            <button type="button" class="btn btn-primary p-5 m-3" onclick="backUp()">&lt;</button>
+            <button type="button" class="btn btn-primary p-5 m-3" onclick="addDigit(0)">0</button>
+            <button type="button" class="btn btn-primary p-5 m-3" onclick="clearPin()">C</button>
+        </div>
+    </form>
 </div>
-{% endblock content %}
+
+<script>
+    function addDigit(digit) {
+        const pinInput = document.getElementById("pinInput");
+        if (pinInput.value.length < 4) {
+            pinInput.value += digit;
+        }
+        if (pinInput.value.length === 4) {
+            document.getElementById("pinForm").submit();
+        }
+    }
+    function clearPin() {
+        document.getElementById("pinInput").value = "";
+    }
+    function backUp() {
+        const pinInput = document.getElementById("pinInput");
+        pinInput.value = pinInput.value.slice(0, -1);
+    }
+</script>
+{% endblock %}

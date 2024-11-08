@@ -12,11 +12,12 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from owners.models import Owner
 from management.models import Manager
-from employees.models import Employee
-from django.shortcuts import render, redirect
+from employees.models import Employee, TimeEntry
+from django.shortcuts import render, redirect, get_object_or_404
 from admin_volt.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserPasswordChangeForm, UserSetPasswordForm
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.contrib.auth import logout
+from django.utils import timezone
 
 from django.contrib.auth.decorators import login_required
 def activate(request, username, token):
@@ -142,3 +143,58 @@ def logout_view(request):
 
 def index(request):
   return render(request, 'pages/index.html')
+
+def enter_pin_view(request):
+    if request.method == 'POST':
+        pin = request.POST.get('pin')
+        # Assume `ssn` field only stores last 4 digits
+        employee = Employee.objects.filter(ssn__endswith=pin).first()
+        if employee:
+            request.session['employee_id'] = employee.id  # Store employee id in session
+            return redirect('clock_in_out')
+        else:
+            return render(request, 'admin/index.html', {'error': 'Invalid PIN. Please try again.'})
+    return render(request, 'admin/index.html')
+
+@login_required
+def clock_in_out_view(request):
+    employee_id = request.session.get('employee_id')
+    if not employee_id:
+        return redirect('enter_pin')
+
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    today = timezone.now().date()
+    time_entry = TimeEntry.objects.filter(employee=employee, day=today).order_by('-clock_in').first()
+
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        try:
+            if action == 'clock_in':
+                employee.clock_in()
+                message = "Clocked in successfully."
+            elif action == 'clock_out':
+                employee.clock_out()
+                message = "Clocked out successfully."
+            return redirect('admin:index')
+        except ValueError as e:
+            return render(request, 'clock_in_out.html', {
+                'employee': employee,
+                'error': str(e),
+                'time_entry': time_entry
+            })
+            
+    return render(request, 'clock_in_out.html', {
+        'employee': employee,
+        'time_entry': time_entry
+    })
+    
+def dashboard(request):
+    today = timezone.now().date()
+    current_employees = TimeEntry.objects.filter(day=today, clock_out=None)
+    finished_shifts = TimeEntry.objects.filter(day=today).exclude(clock_out=None)
+    return render(request, 'pages/dashboard/dashboard.html', {
+        'current_employees': current_employees,
+        'finished_shifts': finished_shifts    
+        })

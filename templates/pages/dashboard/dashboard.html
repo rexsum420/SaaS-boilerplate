@@ -1,7 +1,64 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
-
+{% load admin_volt %}
 {% block content %}
-
-
-{% endblock content %}
+<div class="container text-center">
+    <h1>Dashboard - Today's Shifts</h1>
+    
+    <h2>Currently Working</h2>
+    {% if current_employees %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Clock In Time</th>
+                    <th>Total Hours Worked So Far</th> <!-- Added column -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in current_employees %}
+                    <tr>
+                        <td>{{ entry.employee.first_name }} {{ entry.employee.last_name }}</td>
+                        <td>{{ entry.clock_in|date:"H:i a" }}</td>
+                        <td>
+                            {% with entry.clock_in as clock_in_time %}
+                                {% if clock_in_time %}
+                                    {{ entry.duration|floatformat:2 }}
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No employees are currently clocked in.</p>
+    {% endif %}
+    
+    <h2>Finished Shifts</h2>
+    {% if finished_shifts %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Clock In Time</th>
+                    <th>Clock Out Time</th>
+                    <th>Total Hours Worked for the Day</th> <!-- Added column -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in finished_shifts %}
+                    <tr>
+                        <td>{{ entry.employee.first_name }} {{ entry.employee.last_name }}</td>
+                        <td>{{ entry.clock_in|date:"H:i a" }}</td>
+                        <td>{{ entry.clock_out|date:"H:i a" }}</td>
+                        <td>{{ entry.total_hours }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No completed shifts for today.</p>
+    {% endif %}
+</div>
+{% endblock %}

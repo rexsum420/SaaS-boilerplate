@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import activate, CheckTokenView, UserViewSet
+from .views import activate, CheckTokenView, UserViewSet, clock_in_out_view, enter_pin_view
 from employees.views import EmployeeViewSet
 from management.views import ManagerViewSet
 from owners.views import OwnerViewSet
@@ -38,5 +38,8 @@ urlpatterns = [
     path('accounts/password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='accounts/password-reset-complete.html'
   ), name='password_reset_complete'),
+    path('enter-pin/', enter_pin_view, name='enter_pin'),
+    path('clock-in-out/', clock_in_out_view, name='clock_in_out'),
+    path('dashboard/', views.dashboard, name="dashboard"),
     path('', views.index, name="index"),
 ]

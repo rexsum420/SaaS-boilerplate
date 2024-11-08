@@ -14,6 +14,15 @@ assignment_tag = register.assignment_tag if hasattr(register, 'assignment_tag') 
 def safe_url(view_name, *args):
     return get_safe_url(view_name, *args)
 
+@register.filter
+def time_diff(value, clock_in_time):
+    if value and clock_in_time:
+        # Calculate the difference between now and the clock_in_time
+        now = value
+        delta = now - clock_in_time
+        # Return the time difference in hours (or format it as needed)
+        return str(delta)
+    return "N/A"
 
 @register.filter
 def clean_text(value):

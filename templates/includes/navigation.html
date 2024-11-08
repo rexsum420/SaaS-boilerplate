@@ -43,7 +43,7 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item">
-      <a href="{{ 'admin:index' }}">Home</a>
+      <a href="{% url 'admin:index' %}">Home</a>
     </li>
     {% if request.resolver_match.url_name != "index" and request.resolver_match.url_name != "app_list" %}
       <li class="breadcrumb-item active" aria-current="page">

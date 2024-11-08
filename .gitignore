@@ -2,10 +2,6 @@ venv/*
 .env
 .pyc
 __pycache__/*
-menu/*
-orders/*
-items/*
-tables/*
 build/*
 staticfiles/*
 db.sqlite3

@@ -1,0 +1,18 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+<div class="container text-center">
+    <h2>Welcome, {{ employee.first_name }} {{ employee.last_name }}</h2>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="post" action="{% url 'clock_in_out' %}">
+        {% csrf_token %}
+        {% if not time_entry %}
+        <button type="submit" name="action" value="clock_in" class="btn btn-success">Clock In</button>
+        {% else %}
+        <p>{{ employee.first_name }} clocked in at {{ time_entry.clock_in|time:"H:i A" }}</p>
+        <button type="submit" name="action" value="clock_out" class="btn btn-danger">Clock Out</button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
