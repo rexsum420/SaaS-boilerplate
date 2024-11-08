@@ -7,6 +7,5 @@ orders/*
 items/*
 tables/*
 build/*
-static/*
 staticfiles/*
 db.sqlite3
