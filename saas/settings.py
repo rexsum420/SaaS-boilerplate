@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'corsheaders',
-    'admin_panel',
     'employees',
     'management',
     'owners',
