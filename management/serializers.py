@@ -19,5 +19,5 @@ class ManagerSerializer(serializers.ModelSerializer):
             email=validated_data['user'].email,
             password=password
         )
-        owner = Manager.objects.create(user=user, **validated_data)
-        return owner
+        manager = Manager.objects.create(user=user, **validated_data)
+        return manager

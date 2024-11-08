@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="col-12 d-flex align-items-center justify-content-center">
+    <div class="bg-white shadow border-0 px-4 pb-4 rounded border-light w-100 fmxw-500">
+        <p>
+            <h5 style="text-align:center"><b>Actions</b></h5>
+        </p>
+        <hr />
+        <a href="{% url 'register' %}" class="btn btn-primary">
+            Add User
+        </a>
+    </div>
+</div>
+{% endblock content %}

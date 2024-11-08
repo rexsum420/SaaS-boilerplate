@@ -19,5 +19,5 @@ class EmployeeSerializer(serializers.ModelSerializer):
             email=validated_data['user'].email,
             password=password
         )
-        owner = Employee.objects.create(user=user, **validated_data)
-        return owner
+        employee = Employee.objects.create(user=user, **validated_data)
+        return employee

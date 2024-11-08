@@ -7,14 +7,18 @@ from django.contrib.auth import get_user_model
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.models import User
-from django.contrib import messages
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from owners.models import Owner
 from management.models import Manager
 from employees.models import Employee
+from django.shortcuts import render, redirect
+from admin_volt.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserPasswordChangeForm, UserSetPasswordForm
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
+from django.contrib.auth import logout
 
+from django.contrib.auth.decorators import login_required
 def activate(request, username, token):
     try:
         tokn = Token.objects.get(key=token)
@@ -96,3 +100,45 @@ class UserViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You do not have permission to view this product.")
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+    
+def admin_site(request):
+    return render(request, 'admin.html')
+
+# Authentication
+def register_view(request):
+  if request.method == 'POST':
+    form = RegistrationForm(request.POST)
+    if form.is_valid():
+      print("Account created successfully!")
+      form.save()
+      return redirect('/accounts/login/')
+    else:
+      print("Registration failed!")
+  else:
+    form = RegistrationForm()
+  
+  context = { 'form': form }
+  return render(request, 'accounts/sign-up.html', context)
+
+class UserLoginView(LoginView):
+  form_class = LoginForm
+  template_name = 'accounts/sign-in.html'
+
+class UserPasswordChangeView(PasswordChangeView):
+  template_name = 'accounts/password-change.html'
+  form_class = UserPasswordChangeForm
+
+class UserPasswordResetView(PasswordResetView):
+  template_name = 'accounts/forgot-password.html'
+  form_class = UserPasswordResetForm
+
+class UserPasswrodResetConfirmView(PasswordResetConfirmView):
+  template_name = 'accounts/reset-password.html'
+  form_class = UserSetPasswordForm
+
+def logout_view(request):
+  logout(request)
+  return redirect('/accounts/login/')
+
+def index(request):
+  return render(request, 'pages/index.html')
