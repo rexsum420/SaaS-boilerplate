@@ -23,16 +23,3 @@ class Manager(models.Model):
 
     def __str__(self):
         return self.user.username
-
-@receiver(post_save, sender=User)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Manager.objects.create(user=instance)
-        Token.objects.create(user=instance)
-        
-def send_verification_email(owner, token):
-    activation_url = f"{settings.SITE_URL}{reverse('activate', kwargs={'username': owner.user.username, 'token': token.key})}"
-    subject = "Verify your Email"
-    message = f"Hello {owner.user.username},\n\nPlease confirm your email to verify ownership of your account.\nClick the link below:\n{activation_url}\n\nThank you!"
-    
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [owner.email])

@@ -26,9 +26,8 @@ class Owner(models.Model):
 @receiver(post_save, sender=User)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
-        owner = Owner.objects.create(user=instance)
         token = Token.objects.create(user=instance)
-        send_verification_email(owner, token)
+        send_verification_email(instance, token)
         
 def send_verification_email(owner, token):
     activation_url = f"{settings.SITE_URL}{reverse('activate', kwargs={'username': owner.user.username, 'token': token.key})}"

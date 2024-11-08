@@ -1,14 +1,12 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings
-from django.urls import reverse
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from saas.fields import SSNField
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
+from django.core.validators import RegexValidator
 
 
 class Employee(models.Model):
@@ -21,6 +19,11 @@ class Employee(models.Model):
     email_confirmed = models.BooleanField(default=False)
     last_active = models.CharField(max_length=512, blank=True, null=True)
     ssn = SSNField(unique=True, blank=True, null=True)
+    pin = models.CharField(
+        max_length=4,
+        validators=[RegexValidator(regex=r'^\d{4}$', message="PIN must be exactly 4 digits.")],
+        default="0000"  # Set default as a string to ensure it's always treated as 4 characters
+    )
     pay_rate = models.DecimalField(max_digits=5, decimal_places=2, default=7.50)
     
     def __str__(self):
@@ -51,7 +54,11 @@ class Employee(models.Model):
         )
         total_duration = sum(entry.duration for entry in weekly_entries)
         return total_duration
-
+    
+    def save(self, *args, **kwargs):
+        # Pad pin with leading zeros if necessary
+        self.pin = self.pin.zfill(4)
+        super().save(*args, **kwargs)
 
 class TimeEntry(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -66,7 +73,6 @@ class TimeEntry(models.Model):
             return (self.clock_out - self.clock_in).total_seconds() / 3600
         else:
             return (timezone.now() - self.clock_in).total_seconds() / 3600
-        return 0
 
     @property
     def total_hours(self):
@@ -79,15 +85,7 @@ class TimeEntry(models.Model):
         return f"{self.employee.user.username} - {self.clock_in} to {self.clock_out}"
 
 
-@receiver(post_save, sender=User)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
+@receiver(post_save, sender=Employee)
+def set_pin(sender, instance=None, created=False, **kwargs):
     if created:
-        Employee.objects.create(user=instance)
-        Token.objects.create(user=instance)
-
-
-def send_verification_email(owner, token):
-    activation_url = f"{settings.SITE_URL}{reverse('activate', kwargs={'username': owner.user.username, 'token': token.key})}"
-    subject = "Verify your Email"
-    message = f"Hello {owner.user.username},\n\nPlease confirm your email to verify ownership of your account.\nClick the link below:\n{activation_url}\n\nThank you!"
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [owner.email])
+        instance.pin = instance.ssn[-4]
