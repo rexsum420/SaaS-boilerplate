@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db import models
 from django.utils import timezone
 from django.db.models.signals import post_save
@@ -89,3 +89,9 @@ class TimeEntry(models.Model):
 def set_pin(sender, instance=None, created=False, **kwargs):
     if created:
         instance.pin = instance.ssn[-4]
+
+@receiver(post_save, sender=Employee)
+def assign_employee_group(sender, instance=None, created=False, **kwargs):
+    if created and not instance.user.is_superuser:
+        employee_group, _ = Group.objects.get_or_create(name='Employee')
+        instance.user.groups.add(employee_group)

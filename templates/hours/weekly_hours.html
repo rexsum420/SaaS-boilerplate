@@ -15,16 +15,16 @@
         <tbody>
             {% for entry in weekly_entries %}
                 <tr>
-                    <td>{{ entry.clock_in|date:"h:i a, d M Y" }}</td>
-                    <td>{{ entry.clock_out|date:"h:i a, d M Y" }}</td>
+                    <td>{{ entry.clock_in|date:"D d M h:i a" }}</td>
+                    <td>{{ entry.clock_out|date:"D d M h:i a" }}</td>
                     <td>{{ entry.duration|floatformat:2 }}</td>
                 </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2"><strong>Total Hours</strong></td>
-                <td><strong>{{ total_hours|floatformat:2 }}</strong></td>
+                <td colspan="2"><b style="font-size:14px">Total Hours</b></td>
+                <td><b style="font-size:14px">{{ total_hours|floatformat:2 }}</b></td>
             </tr>
         </tfoot>
     </table>

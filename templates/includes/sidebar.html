@@ -5,7 +5,7 @@
     <div class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
       <div class="d-flex align-items-center">
         <div class="avatar-lg me-4">
-          <img src="{% static 'assets/img/team/profile-picture-4.jpg' %}" class="card-img-top rounded-circle border-white"
+          <img src="{% static 'assets/img/team/pngegg.png' %}" class="card-img-top rounded-circle border-white"
             alt="Bonnie Green">
         </div>
         <div class="d-block">
@@ -44,7 +44,7 @@
           <span class="sidebar-text">Portal</span>
         </a>
       </li>
-      <li class="nav-item {% if 'dashboard' in segment %}active{% endif %} mt-5">
+      <li class="nav-item {% if 'dashboard' in segment %}active{% endif %} mb-5">
         <a href="{% url 'dashboard' %}" class="nav-link">
           <span class="sidebar-icon">
             <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -54,6 +54,9 @@
           </span>
           <span class="sidebar-text">Dashboard</span>
         </a>
+      </li>
+      <li class="nav-item">
+        <span class="sidebar-text">Models</span>
       </li>
       {% admin_get_menu as app_list %}
       {% if app_list %}
@@ -106,7 +109,13 @@
           {% endif %}
         {% endfor %}
       {% endif %}
-
+      <li class="nav-items mt-5">
+        <span>
+          <a href="{% url 'register' %}">
+            Add User
+          </a>
+        </span>
+      </li>
     </ul>
   </div>
 </nav>
