@@ -41,5 +41,6 @@ urlpatterns = [
     path('enter-pin/', enter_pin_view, name='enter_pin'),
     path('clock-in-out/', clock_in_out_view, name='clock_in_out'),
     path('dashboard/', views.dashboard, name="dashboard"),
+    path('hours/<int:user_id>/', views.weekly_hours, name='weekly_hours'),
     path('', views.index, name="index"),
 ]

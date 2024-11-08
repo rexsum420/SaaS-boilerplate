@@ -1,0 +1,32 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Weekly Hours for {{ user.first_name }} {{ user.last_name }}</h2>
+    <p>Week starting: {{ start_of_week }}</p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Clock In</th>
+                <th>Clock Out</th>
+                <th>Hours</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in weekly_entries %}
+                <tr>
+                    <td>{{ entry.clock_in|date:"h:i a, d M Y" }}</td>
+                    <td>{{ entry.clock_out|date:"h:i a, d M Y" }}</td>
+                    <td>{{ entry.duration|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2"><strong>Total Hours</strong></td>
+                <td><strong>{{ total_hours|floatformat:2 }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}

@@ -22,7 +22,7 @@ class Employee(models.Model):
     pin = models.CharField(
         max_length=4,
         validators=[RegexValidator(regex=r'^\d{4}$', message="PIN must be exactly 4 digits.")],
-        default="0000"  # Set default as a string to ensure it's always treated as 4 characters
+        default="0000" 
     )
     pay_rate = models.DecimalField(max_digits=5, decimal_places=2, default=7.50)
     

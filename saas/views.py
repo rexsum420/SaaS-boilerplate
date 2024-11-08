@@ -11,13 +11,14 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from owners.models import Owner
-from management.models import Manager
+from management.models import Manager, ManagerEntry
 from employees.models import Employee, TimeEntry
 from django.shortcuts import render, redirect, get_object_or_404
 from admin_volt.forms import RegistrationForm, LoginForm, UserPasswordResetForm, UserPasswordChangeForm, UserSetPasswordForm
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.contrib.auth import logout
 from django.utils import timezone
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 def activate(request, username, token):
@@ -194,7 +195,40 @@ def dashboard(request):
     today = timezone.now().date()
     current_employees = TimeEntry.objects.filter(day=today, clock_out=None)
     finished_shifts = TimeEntry.objects.filter(day=today).exclude(clock_out=None)
+    current_managers = ManagerEntry.objects.filter(day=today, clock_out=None)
+    finished_managers = ManagerEntry.objects.filter(day=today).exclude(clock_out=None)
     return render(request, 'pages/dashboard/dashboard.html', {
         'current_employees': current_employees,
-        'finished_shifts': finished_shifts    
+        'finished_shifts': finished_shifts,
+        'current_managers': current_managers,
+        'finished_managers': finished_managers
         })
+
+def weekly_hours(request, user_id):
+    # Check if the user is an employee or manager
+    employee = Employee.objects.filter(user__id=user_id).first()
+    manager = Manager.objects.filter(user__id=user_id).first()
+
+    # Get start of the week (Monday)
+    start_of_week = timezone.now().date() - timedelta(days=timezone.now().weekday())
+
+    # Fetch weekly hours for either employee or manager
+    if employee:
+        weekly_entries = TimeEntry.objects.filter(employee=employee, clock_in__date__gte=start_of_week)
+        user = employee.user
+    elif manager:
+        weekly_entries = ManagerEntry.objects.filter(manager=manager, clock_in__date__gte=start_of_week)
+        user = manager.user
+    else:
+        weekly_entries = None
+        user = None
+
+    # Calculate total weekly hours
+    total_hours = sum(entry.duration for entry in weekly_entries) if weekly_entries else 0
+
+    return render(request, 'hours/weekly_hours.html', {
+        'user': user,
+        'weekly_entries': weekly_entries,
+        'total_hours': total_hours,
+        'start_of_week': start_of_week,
+    })
