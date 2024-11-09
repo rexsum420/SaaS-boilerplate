@@ -84,12 +84,6 @@ class TimeEntry(models.Model):
     def __str__(self):
         return f"{self.employee.user.username} - {self.clock_in} to {self.clock_out}"
 
-
-@receiver(post_save, sender=Employee)
-def set_pin(sender, instance=None, created=False, **kwargs):
-    if created:
-        instance.pin = instance.ssn[-4]
-
 @receiver(post_save, sender=Employee)
 def assign_employee_group(sender, instance=None, created=False, **kwargs):
     if created and not instance.user.is_superuser:

@@ -30,8 +30,8 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         send_verification_email(instance, token)
         
 def send_verification_email(owner, token):
-    activation_url = f"{settings.SITE_URL}{reverse('activate', kwargs={'username': owner.user.username, 'token': token.key})}"
+    activation_url = f"{settings.SITE_URL}{reverse('activate', kwargs={'username': owner.username, 'token': token.key})}"
     subject = "Verify your Email"
-    message = f"Hello {owner.user.username},\n\nPlease confirm your email to verify ownership of your account.\nClick the link below:\n{activation_url}\n\nThank you!"
+    message = f"Hello {owner.username},\n\nPlease confirm your email to verify ownership of your account.\nClick the link below:\n{activation_url}\n\nThank you!"
     
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [owner.email])

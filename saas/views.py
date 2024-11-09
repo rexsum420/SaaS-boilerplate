@@ -19,8 +19,10 @@ from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChan
 from django.contrib.auth import logout
 from django.utils import timezone
 from datetime import timedelta, datetime
-from django.db.models import Sum
 import pytz
+from django.db.models import Sum, F, DateTimeField
+from django.db.models.functions import TruncHour
+from orders.models import Order
 
 
 from django.contrib.auth.decorators import login_required
@@ -105,7 +107,8 @@ class UserViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You do not have permission to view this product.")
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
-    
+
+@login_required(login_url="login")
 def admin_site(request):
     return render(request, 'admin.html')
 
@@ -144,15 +147,15 @@ class UserPasswrodResetConfirmView(PasswordResetConfirmView):
 def logout_view(request):
   logout(request)
   return redirect('/accounts/login/')
-
+@login_required(login_url="login")
 def index(request):
   return render(request, 'pages/index.html')
-
+@login_required(login_url="login")
 def enter_pin_view(request):
     if request.method == 'POST':
         pin = request.POST.get('pin')
         # Assume `ssn` field only stores last 4 digits
-        employee = Employee.objects.filter(ssn__endswith=pin).first()
+        employee = Employee.objects.filter(pin=pin).first()
         if employee:
             request.session['employee_id'] = employee.id  # Store employee id in session
             return redirect('clock_in_out')
@@ -160,7 +163,7 @@ def enter_pin_view(request):
             return render(request, 'admin/index.html', {'error': 'Invalid PIN. Please try again.'})
     return render(request, 'admin/index.html')
 
-@login_required
+@login_required(login_url="login")
 def clock_in_out_view(request):
     employee_id = request.session.get('employee_id')
     if not employee_id:
@@ -168,7 +171,9 @@ def clock_in_out_view(request):
 
     employee = get_object_or_404(Employee, id=employee_id)
     
-    today = timezone.now().date()
+    chicago_tz = pytz.timezone("America/Chicago")
+    chicago_time = datetime.now(chicago_tz).date()
+    today = chicago_time
     time_entry = TimeEntry.objects.filter(employee=employee, day=today).order_by('-clock_in').first()
 
 
@@ -193,11 +198,38 @@ def clock_in_out_view(request):
         'employee': employee,
         'time_entry': time_entry
     })
-    
+
+@login_required(login_url="login")
 def dashboard(request):
+    # Set timezone and get the current date in Chicago time
     chicago_tz = pytz.timezone("America/Chicago")
-    chicago_time = datetime.now(chicago_tz).date()
-    today = chicago_time
+    chicago_time = datetime.now(chicago_tz)
+    today = chicago_time.date()
+
+    # Generate a list of all hours in the day (0 through 23)
+    all_hours = [chicago_time.replace(hour=h, minute=0, second=0, microsecond=0) for h in range(24)]
+
+    # Fetch the sales data, grouped by hour
+    hourly_sales = (
+        Order.objects.filter(created_at__date=today)
+        .annotate(hour=TruncHour('created_at', output_field=DateTimeField()))
+        .values('hour')
+        .annotate(total_sales=Sum(F('line_items__quantity') * F('line_items__price')))
+        .order_by('hour')
+    )
+
+    # Create a dictionary of sales by hour for easy lookup
+    sales_dict = {sale['hour'].hour: sale['total_sales'] for sale in hourly_sales}
+
+    # For each hour, if no sale exists, default to 0, and format the hour as an integer
+    hourly_sales_with_defaults = [
+        {
+            'hour': hour.hour,
+            'total_sales': sales_dict.get(hour.hour, 0)
+        }
+        for hour in all_hours
+    ]
+    print(hourly_sales_with_defaults)
     current_employees = TimeEntry.objects.filter(day=today, clock_out=None)
     finished_shifts = TimeEntry.objects.filter(day=today).exclude(clock_out=None)
     current_managers = ManagerEntry.objects.filter(day=today, clock_out=None)
@@ -209,8 +241,10 @@ def dashboard(request):
         'current_managers': current_managers,
         'finished_managers': finished_managers,
         'today': chicago_time,
-        })
+        'hourly_sales': hourly_sales_with_defaults,
+    })
 
+@login_required(login_url="login")
 def weekly_hours(request, user_id):
     # Check if the user is an employee or manager
     employee = Employee.objects.filter(user__id=user_id).first()
@@ -239,7 +273,8 @@ def weekly_hours(request, user_id):
         'total_hours': total_hours,
         'start_of_week': start_of_week,
     })
-
+    
+@login_required(login_url="login")
 def report_labor(request):
     # Initialize arrays for storing weekly totals and labels
     weekly_totals = []
@@ -254,23 +289,23 @@ def report_labor(request):
     while week_start <= current_date:
         week_end = week_start + timedelta(days=6)
         
-        # Calculate total hours for the week for employees
+        # Calculate total wages for the week for employees
         employee_entries = TimeEntry.objects.filter(
             employee__in=Employee.objects.all(),
             clock_in__date__range=(week_start, week_end)
         )
-        employee_hours = sum(entry.duration for entry in employee_entries)
-
-        # Calculate total hours for the week for managers
+        total_employee_wages = sum(float(entry.duration) * float(entry.employee.pay_rate) for entry in employee_entries)
+        
+        # Calculate total wages for the week for managers
         manager_entries = ManagerEntry.objects.filter(
             manager__in=Manager.objects.all(),
             clock_in__date__range=(week_start, week_end)
         )
-        manager_hours = sum(entry.duration for entry in manager_entries)
+        total_manager_wages = sum(float(entry.duration) * float(entry.manager.pay_rate) for entry in manager_entries)
         
-        # Sum employee and manager hours for the week and append to weekly totals
-        weekly_totals.append(employee_hours + manager_hours)
-
+        # Sum employee and manager wages for the week and append to weekly totals
+        weekly_totals.append(total_employee_wages + total_manager_wages)
+        
         # Add date label only for the first week of each month
         if week_start.day <= 7:  # First week of the month
             week_labels.append(f"{week_start.strftime('%b %d')} - {week_end.strftime('%b %d')}")

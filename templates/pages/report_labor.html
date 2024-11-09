@@ -12,8 +12,8 @@
     const weekLabels = {{ week_labels|safe }};
 
     // Define threshold values for colors
-    const lowThreshold = 20;   // Hours below which the bar is green
-    const highThreshold = 40;  // Hours above which the bar is red
+    const lowThreshold = 2000; 
+    const highThreshold = 4000;
 
     // Generate color for each bar based on weekly total hours
     const barColors = weeklyTotals.map(hours => {
