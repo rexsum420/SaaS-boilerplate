@@ -30,3 +30,11 @@ Each user can click their name and see all the shifts they have worked that week
 ![Registration Form](images/register.png)
 
 ![Change Password](images/nav_menu.png)
+
+# Labor Reports Weekly over a Year
+
+![Labor Report](images/report.png)
+
+# REST API already coded for the models
+
+# Privilage set for secure business use 
