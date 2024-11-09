@@ -8,12 +8,17 @@ from owners.views import OwnerViewSet
 from rest_framework.authtoken.views import ObtainAuthToken
 from . import views
 from django.contrib.auth import views as auth_views
+from orders.views import OrderViewSet, LineItemViewSet
+from transactions.views import TransactionViewSet
 
 router = DefaultRouter()
 router.register('users', UserViewSet, basename='user')
 router.register('employees', EmployeeViewSet, basename='employee')
 router.register('managers', ManagerViewSet, basename='manager')
 router.register('owners', OwnerViewSet, basename='owner')
+router.register('orders', OrderViewSet, basename='order')
+router.register('lineitems', LineItemViewSet, basename='lineitem')
+router.register('transactions', TransactionViewSet, basename='transaction')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
