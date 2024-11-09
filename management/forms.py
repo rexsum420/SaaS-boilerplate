@@ -11,7 +11,7 @@ class ManagerForm(forms.ModelForm):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    
+    ssn = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'ssnInput'}))
     class Meta:
         model = Manager
         fields = ('user', 'first_name', 'last_name', 'email', 'phone_number', 'ssn', 'pin')
@@ -22,6 +22,5 @@ class ManagerForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'ssn': forms.TextInput(attrs={'class': 'form-control'}),
             'pin': forms.TextInput(attrs={'class': 'form-control'}),
         }

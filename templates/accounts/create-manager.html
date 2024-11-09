@@ -1,22 +1,180 @@
 {% extends "layouts/base.html" %}
 {% block content %}
 <div class="container p-5">
-    <div class="card shadow">
+    <div class="card shadow-lg" style="background-color: #D0D0D0;">
         <div class="container p-5">
-<h1>Create Manager</h1>
-<form method="post">
-    {% csrf_token %}
-    
-    <h3>Manager Information</h3>
-    {{ employee_form.as_p }}
-    
-    <h3>User Information</h3>
-    <p>If there is no user for this manager, please fill out the user information below to create a new user.</p>
-    {{ user_form.as_p }}
-
-    <button class="btn btn-primary" type="submit">Create Manager</button>
-</form>
-</div>
-</div>
+            <div cass="card-header">
+                <h1 style="text-shadow:1px 1px 0px #000000;"><center>Create Manager</center></h1>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3 style="text-shadow:1px 1px 0px #000000;"><small>Manager Information</small></h3>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.user.label_tag }}
+                                {{ employee_form.user }}
+                                {% if employee_form.user.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.user.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.user.errors %}
+                                    <div class="text-danger">{{ employee_form.user.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.first_name.label_tag }}
+                                {{ employee_form.first_name }}
+                                {% if employee_form.first_name.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.first_name.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.first_name.errors %}
+                                    <div class="text-danger">{{ employee_form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.last_name.label_tag }}
+                                {{ employee_form.last_name }}
+                                {% if employee_form.last_name.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.last_name.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.last_name.errors %}
+                                    <div class="text-danger">{{ employee_form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.email.label_tag }}
+                                {{ employee_form.email }}
+                                {% if employee_form.email.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.email.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.email.errors %}
+                                    <div class="text-danger">{{ employee_form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.phone_number.label_tag }}
+                                {{ employee_form.phone_number }}
+                                {% if employee_form.phone_number.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.phone_number.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.phone_number.errors %}
+                                    <div class="text-danger">{{ employee_form.phone_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.pin.label_tag }}
+                                {{ employee_form.pin }}
+                                {% if employee_form.pin.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.pin.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.pin.errors %}
+                                    <div class="text-danger">{{ employee_form.pin.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ employee_form.ssn.label_tag }}
+                                {{ employee_form.ssn }}
+                                {% if employee_form.ssn.help_text %}
+                                    <small class="form-text text-muted">{{ employee_form.ssn.help_text }}</small>
+                                {% endif %}
+                                {% if employee_form.ssn.errors %}
+                                    <div class="text-danger">{{ employee_form.ssn.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <h3 style="text-shadow:1px 1px 0px #000000;">User Information</h3>
+                    <p>If there is no user for this manager, please fill out the user information below to create a new user.</p>
+                    <div class="row">
+                        <!-- Display specific fields from user_form in two columns -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ user_form.username.label_tag }}
+                                {{ user_form.username }}
+                                {% if user_form.username.help_text %}
+                                    <small class="form-text text-muted">{{ user_form.username.help_text }}</small>
+                                {% endif %}
+                                {% if user_form.username.errors %}
+                                    <div class="text-danger">{{ user_form.username.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ user_form.email.label_tag }}
+                                {{ user_form.email }}
+                                {% if user_form.email.help_text %}
+                                    <small class="form-text text-muted">{{ user_form.email.help_text }}</small>
+                                {% endif %}
+                                {% if user_form.email.errors %}
+                                    <div class="text-danger">{{ user_form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Add more fields from user_form as needed -->
+                    </div>
+                    <div class="row">
+                        <!-- Display specific fields from user_form in two columns -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ user_form.password1.label_tag }}
+                                {{ user_form.password1 }}
+                                {% if user_form.password1.help_text %}
+                                    <small class="form-text text-muted">{{ user_form.password1.help_text }}</small>
+                                {% endif %}
+                                {% if user_form.password1.errors %}
+                                    <div class="text-danger">{{ user_form.password1.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ user_form.password2.label_tag }}
+                                {{ user_form.password2 }}
+                                {% if user_form.password2.help_text %}
+                                    <small class="form-text text-muted">{{ user_form.password2.help_text }}</small>
+                                {% endif %}
+                                {% if user_form.password2.errors %}
+                                    <div class="text-danger">{{ user_form.password2.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Add more fields from user_form as needed -->
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" type="submit">Create Manager</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
