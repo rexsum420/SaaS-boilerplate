@@ -5,16 +5,29 @@
     <form id="pinForm" method="post" action="{% url 'enter_pin' %}">
         {% csrf_token %}
         <div id="pin-display">
-            <input type="password" name="pin" id="pinInput" maxlength="4" autocomplete="off" style="text-align: center; font-size: 60px; width: 500px;" required readonly>
+            <input type="password" name="pin" id="pinInput" maxlength="4" autocomplete="off" style="text-align: center; font-size: 60px; width: 80%;" required readonly>
         </div>
-        <div class="buttons">
-            {% for i in "123456789" %}
-                <button type="button" class="btn btn-primary p-5 m-3" onclick="addDigit('{{ i }}')">{{ i }}</button>
-                {% if forloop.counter|divisibleby:3 %}<br>{% endif %}
-            {% endfor %}
-            <button type="button" class="btn btn-primary p-5 m-3" onclick="backUp()">&lt;</button>
-            <button type="button" class="btn btn-primary p-5 m-3" onclick="addDigit(0)">0</button>
-            <button type="button" class="btn btn-primary p-5 m-3" onclick="clearPin()">C</button>
+        
+        <!-- Flexbox container for buttons -->
+        <div class="container mt-4">
+            <div class="row">
+                {% for i in "123456789" %}
+                    <div class="col-4 d-flex justify-content-around align-items-around">
+                        <button type="button" class="btn btn-primary p-5 m-2" onclick="addDigit('{{ i }}')">
+                            {{ i }}
+                        </button>
+                    </div>
+                {% endfor %}
+                <div class="col-4 d-flex justify-content-around align-items-around">
+                    <button type="button" class="btn btn-primary p-5 m-2" onclick="backUp()">&lt;</button>
+                </div>
+                <div class="col-4 d-flex justify-content-around align-items-around">
+                    <button type="button" class="btn btn-primary p-5 m-2" onclick="addDigit(0)">0</button>
+                </div>
+                <div class="col-4 d-flex justify-content-around align-items-around">
+                    <button type="button" class="btn btn-primary p-5 m-2" onclick="clearPin()">C</button>
+                </div>
+            </div>
         </div>
     </form>
 </div>
