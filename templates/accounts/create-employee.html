@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container p-5">
+    <div class="card shadow">
+        <div class="container p-5">
+<h1>Create Employee</h1>
+<form method="post">
+    {% csrf_token %}
+    
+    <h3>Employee Information</h3>
+    {{ employee_form.as_p }}
+    
+    <h3>User Information</h3>
+    <p>If there is no user for this employee, please fill out the user information below to create a new user.</p>
+    {{ user_form.as_p }}
+
+    <button class="btn btn-primary" type="submit">Create Employee</button>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

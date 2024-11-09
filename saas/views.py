@@ -229,7 +229,7 @@ def dashboard(request):
         }
         for hour in all_hours
     ]
-    print(hourly_sales_with_defaults)
+
     current_employees = TimeEntry.objects.filter(day=today, clock_out=None)
     finished_shifts = TimeEntry.objects.filter(day=today).exclude(clock_out=None)
     current_managers = ManagerEntry.objects.filter(day=today, clock_out=None)

@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import activate, CheckTokenView, UserViewSet, clock_in_out_view, enter_pin_view
-from employees.views import EmployeeViewSet
-from management.views import ManagerViewSet
+from employees.views import EmployeeViewSet, create_employee
+from management.views import ManagerViewSet, create_manager
 from owners.views import OwnerViewSet
 from rest_framework.authtoken.views import ObtainAuthToken
 from . import views
@@ -48,5 +48,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name="dashboard"),
     path('hours/<int:user_id>/', views.weekly_hours, name='weekly_hours'),
     path('hours/report/', views.report_labor, name="report_labor"),
+    path('accounts/create-employee/', create_employee, name='register_employee'),
+    path('accounts/create-manager/', create_manager, name='register_manager'),
     path('', views.index, name="index"),
 ]
