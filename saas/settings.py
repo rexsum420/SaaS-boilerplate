@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'saas.context_processor.role_processor',
                 'saas.context_processor.url_utils',
+                'saas.context_processor.settings_processor',
                 
             ],
         },

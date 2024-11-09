@@ -2,6 +2,8 @@ from owners.models import Owner
 from management.models import Manager
 from employees.models import Employee
 from django.urls import reverse, NoReverseMatch
+from datetime import timedelta
+from django.utils import timezone
 
 def get_safe_url(view_name, *args, **kwargs):
     """
@@ -45,4 +47,27 @@ def role_processor(request):
         role = None   
     return {
         'role': role
+    }
+
+def settings_processor(request):
+    # Default start of the week is Monday (0)
+    user_start_of_week = request.session.get('start_of_week', 0)
+
+    # Default pay period duration is weekly (7 days)
+    pay_period_duration = request.session.get('pay_period_duration', 7)
+
+    # Get today's date
+    today = timezone.now().date()
+
+    # Calculate the start of the current week based on user's start of week preference (0-6)
+    # Calculate the number (0-6) of the day of the week from user's start_of_week preference
+    start_of_week_number = (today.weekday() - user_start_of_week) % 7
+
+    # Optionally, calculate the start of the pay period based on the chosen duration
+    start_of_pay_period = today - timedelta(days=(today.toordinal() % pay_period_duration))
+
+    return {
+        'start_of_week': start_of_week_number,
+        'pay_period_duration': pay_period_duration,
+        'start_of_pay_period': start_of_pay_period,
     }

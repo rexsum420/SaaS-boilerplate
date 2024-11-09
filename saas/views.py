@@ -23,6 +23,7 @@ import pytz
 from django.db.models import Sum, F, DateTimeField
 from django.db.models.functions import TruncHour
 from orders.models import Order
+from django.views.decorators.http import require_POST
 
 
 from django.contrib.auth.decorators import login_required
@@ -250,15 +251,21 @@ def weekly_hours(request, user_id):
     employee = Employee.objects.filter(user__id=user_id).first()
     manager = Manager.objects.filter(user__id=user_id).first()
 
-    # Get start of the week (Monday)
-    start_of_week = timezone.now().date() - timedelta(days=timezone.now().weekday())
+    # Get start of the week from session or use default (0 = Monday)
+    start_of_week = request.session.get('start_of_week', 0)  # Default to Monday (0)
+    
+    # Get today's date
+    today = timezone.now().date()
+
+    # Calculate the start of the week based on user's start of week preference (0-6)
+    start_of_week_date = today - timedelta(days=(today.weekday() - start_of_week) % 7)
 
     # Fetch weekly hours for either employee or manager
     if employee:
-        weekly_entries = TimeEntry.objects.filter(employee=employee, clock_in__date__gte=start_of_week)
+        weekly_entries = TimeEntry.objects.filter(employee=employee, clock_in__date__gte=start_of_week_date)
         user = employee.user
     elif manager:
-        weekly_entries = ManagerEntry.objects.filter(manager=manager, clock_in__date__gte=start_of_week)
+        weekly_entries = ManagerEntry.objects.filter(manager=manager, clock_in__date__gte=start_of_week_date)
         user = manager.user
     else:
         weekly_entries = None
@@ -271,52 +278,73 @@ def weekly_hours(request, user_id):
         'user': user,
         'weekly_entries': weekly_entries,
         'total_hours': total_hours,
-        'start_of_week': start_of_week,
+        'start_of_week': start_of_week_date,
     })
-    
+
 @login_required(login_url="login")
 def report_labor(request):
-    # Initialize arrays for storing weekly totals and labels
-    weekly_totals = []
-    week_labels = []
-    
+    # Get user settings from session or use defaults
+    start_of_week = request.session.get('start_of_week', 0)  # Default to Monday (0)
+    pay_period_duration = request.session.get('pay_period_duration', 7)  # Default to weekly (7 days)
+
+    # Initialize arrays for storing totals and labels
+    pay_period_totals = []
+    period_labels = []
+
     # Get the current date and the start of the year
     current_date = timezone.now().date()
     start_of_year = current_date.replace(month=1, day=1)
-    
-    # Loop through each week of the year
-    week_start = start_of_year
-    while week_start <= current_date:
-        week_end = week_start + timedelta(days=6)
-        
-        # Calculate total wages for the week for employees
+
+    # Align start of the first pay period to user-defined start of week
+    start_of_period = start_of_year - timedelta(days=(start_of_year.weekday() - start_of_week) % 7)
+
+    # Loop through each pay period until the current date
+    while start_of_period <= current_date:
+        end_of_period = start_of_period + timedelta(days=pay_period_duration - 1)
+
+        # Calculate total wages for employees within the pay period
         employee_entries = TimeEntry.objects.filter(
             employee__in=Employee.objects.all(),
-            clock_in__date__range=(week_start, week_end)
+            clock_in__date__range=(start_of_period, end_of_period)
         )
         total_employee_wages = sum(float(entry.duration) * float(entry.employee.pay_rate) for entry in employee_entries)
-        
-        # Calculate total wages for the week for managers
+
+        # Calculate total wages for managers within the pay period
         manager_entries = ManagerEntry.objects.filter(
             manager__in=Manager.objects.all(),
-            clock_in__date__range=(week_start, week_end)
+            clock_in__date__range=(start_of_period, end_of_period)
         )
         total_manager_wages = sum(float(entry.duration) * float(entry.manager.pay_rate) for entry in manager_entries)
-        
-        # Sum employee and manager wages for the week and append to weekly totals
-        weekly_totals.append(total_employee_wages + total_manager_wages)
-        
-        # Add date label only for the first week of each month
-        if week_start.day <= 7:  # First week of the month
-            week_labels.append(f"{week_start.strftime('%b %d')} - {week_end.strftime('%b %d')}")
+
+        # Append total wages for the pay period
+        pay_period_totals.append(total_employee_wages + total_manager_wages)
+
+        # Add a label for the first period of each month or when the period crosses into a new month
+        if start_of_period.day <= 7 or start_of_period.month != end_of_period.month:
+            period_labels.append(f"{start_of_period.strftime('%b %d')} - {end_of_period.strftime('%b %d')}")
         else:
-            week_labels.append('')  # Empty label for other weeks
-        
-        # Move to the next week
-        week_start += timedelta(weeks=1)
-    
-    # Render the template with weekly_totals and week_labels
+            period_labels.append('')  # Empty label for other periods
+
+        # Move to the next pay period
+        start_of_period += timedelta(days=pay_period_duration)
+
+    # Render the template with calculated totals and labels
     return render(request, 'pages/report_labor.html', {
-        'weekly_totals': weekly_totals,
-        'week_labels': week_labels,
+        'weekly_totals': pay_period_totals,
+        'week_labels': period_labels,
     })
+
+
+def set_user_preferences(request):
+    if request.method == 'POST':        
+        # Get the start of week and pay period duration from POST data
+        start_of_week = int(request.POST.get('start_of_week', 0))
+        pay_period_duration = int(request.POST.get('pay_period_duration', 7))
+
+        # Save these values in the session
+        request.session['start_of_week'] = start_of_week
+        request.session['pay_period_duration'] = pay_period_duration
+
+        return redirect('dashboard')
+
+    return render(request, 'pages/settings.html')

@@ -50,5 +50,6 @@ urlpatterns = [
     path('hours/report/', views.report_labor, name="report_labor"),
     path('accounts/create-employee/', create_employee, name='register_employee'),
     path('accounts/create-manager/', create_manager, name='register_manager'),
+    path('set-user-preferences/', views.set_user_preferences, name='set_user_preferences'),
     path('', views.index, name="index"),
 ]
