@@ -1,0 +1,53 @@
+{% extends "layouts/base.html" %}
+{% block extrahead %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock extrahead %}
+{% block content %}
+<canvas id="weeklyHoursChart"></canvas>
+{% endblock content %}
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('weeklyHoursChart').getContext('2d');
+    const weeklyTotals = {{ weekly_totals|safe }};
+    const weekLabels = {{ week_labels|safe }};
+
+    // Define threshold values for colors
+    const lowThreshold = 20;   // Hours below which the bar is green
+    const highThreshold = 40;  // Hours above which the bar is red
+
+    // Generate color for each bar based on weekly total hours
+    const barColors = weeklyTotals.map(hours => {
+        if (hours < lowThreshold) {
+            return 'rgba(75, 192, 75, 1)';   // Green for hours below lowThreshold
+        } else if (hours > highThreshold) {
+            return 'rgba(192, 75, 75, 1)';   // Red for hours above highThreshold
+        } else {
+            return 'rgba(192, 192, 192, 1)'; // Grey for hours in between thresholds
+        }
+    });
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: weekLabels,
+            datasets: [{
+                label: 'Total Weekly Hours',
+                data: weeklyTotals,
+                backgroundColor: barColors, // Apply dynamic colors
+                borderColor: 'rgba(0, 0, 0, 0.1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    title: { display: true, text: 'Weeks' },
+                    ticks: { autoSkip: false }
+                },
+                y: { title: { display: true, text: 'Hours Worked' } }
+            }
+        }
+    });
+</script>
+{% endblock extra_js %}

@@ -18,7 +18,10 @@ from admin_volt.forms import RegistrationForm, LoginForm, UserPasswordResetForm,
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView, PasswordResetConfirmView
 from django.contrib.auth import logout
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
+from django.db.models import Sum
+import pytz
+
 
 from django.contrib.auth.decorators import login_required
 def activate(request, username, token):
@@ -192,16 +195,20 @@ def clock_in_out_view(request):
     })
     
 def dashboard(request):
-    today = timezone.now().date()
+    chicago_tz = pytz.timezone("America/Chicago")
+    chicago_time = datetime.now(chicago_tz).date()
+    today = chicago_time
     current_employees = TimeEntry.objects.filter(day=today, clock_out=None)
     finished_shifts = TimeEntry.objects.filter(day=today).exclude(clock_out=None)
     current_managers = ManagerEntry.objects.filter(day=today, clock_out=None)
     finished_managers = ManagerEntry.objects.filter(day=today).exclude(clock_out=None)
+
     return render(request, 'pages/dashboard/dashboard.html', {
         'current_employees': current_employees,
         'finished_shifts': finished_shifts,
         'current_managers': current_managers,
-        'finished_managers': finished_managers
+        'finished_managers': finished_managers,
+        'today': chicago_time,
         })
 
 def weekly_hours(request, user_id):
@@ -231,4 +238,50 @@ def weekly_hours(request, user_id):
         'weekly_entries': weekly_entries,
         'total_hours': total_hours,
         'start_of_week': start_of_week,
+    })
+
+def report_labor(request):
+    # Initialize arrays for storing weekly totals and labels
+    weekly_totals = []
+    week_labels = []
+    
+    # Get the current date and the start of the year
+    current_date = timezone.now().date()
+    start_of_year = current_date.replace(month=1, day=1)
+    
+    # Loop through each week of the year
+    week_start = start_of_year
+    while week_start <= current_date:
+        week_end = week_start + timedelta(days=6)
+        
+        # Calculate total hours for the week for employees
+        employee_entries = TimeEntry.objects.filter(
+            employee__in=Employee.objects.all(),
+            clock_in__date__range=(week_start, week_end)
+        )
+        employee_hours = sum(entry.duration for entry in employee_entries)
+
+        # Calculate total hours for the week for managers
+        manager_entries = ManagerEntry.objects.filter(
+            manager__in=Manager.objects.all(),
+            clock_in__date__range=(week_start, week_end)
+        )
+        manager_hours = sum(entry.duration for entry in manager_entries)
+        
+        # Sum employee and manager hours for the week and append to weekly totals
+        weekly_totals.append(employee_hours + manager_hours)
+
+        # Add date label only for the first week of each month
+        if week_start.day <= 7:  # First week of the month
+            week_labels.append(f"{week_start.strftime('%b %d')} - {week_end.strftime('%b %d')}")
+        else:
+            week_labels.append('')  # Empty label for other weeks
+        
+        # Move to the next week
+        week_start += timedelta(weeks=1)
+    
+    # Render the template with weekly_totals and week_labels
+    return render(request, 'pages/report_labor.html', {
+        'weekly_totals': weekly_totals,
+        'week_labels': week_labels,
     })
