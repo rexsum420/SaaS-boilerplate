@@ -22,7 +22,8 @@ Each user can click their name and see all the shifts they have worked that week
 
 ![A sample of a model](images/user_model.png)
 
-![A sample of an object](images/owner_object.png)
+
+![A sample of an object](images/owner_model.png)
 
 # Full User Authentication with Forms
 
